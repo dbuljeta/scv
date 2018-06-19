@@ -9,25 +9,51 @@ using namespace cv;
 #define IMAGE_W 1280
 
 // https://www.learnopencv.com/install-opencv3-on-ubuntu/
-// g++ -std=c++11 removeRedEyes.cpp `pkg-config --libs --cflags opencv` -o removeRedEyes
+// g++ -std=c++11 test.cpp `pkg-config --libs --cflags opencv` -o test
+
+
+void setAlpha(Mat* img)
+{
+  cvtColor(*img, *img, COLOR_BGR2BGRA);
+  for (int y = 0; y < (*img).rows; ++y)
+    for (int x = 0; x < (*img).cols; ++x)
+    {
+        cv::Vec4b & pixel = (*img).at<cv::Vec4b>(y, x);
+        // if pixel is white
+        if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0)
+        {
+            // set alpha to zero:
+            pixel[3] = 0;
+        }
+    }
+}
+
+void mergeImages (Mat* stitched, Mat front, Mat right, Mat back, Mat left, Mat car)
+{
+  //  imshow("left", left);
+  // imshow("right", right);
+  // imshow("front", front);
+  // imshow("back", back);
+  // imshow("stitched", *stitched);
+  // imwrite("stitched.png",*stitched);
+  
+}
+
 
 int main ()
 {
   Rect warpPerspCrop(0, 400, IMAGE_W, IMAGE_H - 400);
   Mat left = imread("left.bmp", IMREAD_COLOR);
   Mat leftUnd;
-  Mat leftWarped;
   Mat right = imread("right.bmp", IMREAD_COLOR);
   Mat rightUnd;
-  Mat rightWarped;
   Mat front = imread("front.bmp", IMREAD_COLOR);
   Mat frontUnd;
-  Mat frontWarped;
   Mat back = imread("back.bmp", IMREAD_COLOR);
   Mat backUnd;
-  Mat backWarped;
-  
-  
+  Mat car = imread ("blueCarResized.png", IMREAD_COLOR);
+  Mat stitched(2000, 2500, CV_8UC3, Scalar(0, 0, 0));  
+  setAlpha(&stitched);
   //init undistort rectify params
   Matx33d P (335.4360116970886, 0.0, 638.3853408401494 ,
                0.0, 335.6314521829435, 403.2844174394132,
@@ -66,22 +92,32 @@ int main ()
   remap(front, frontUnd, map_x, map_y, INTER_LINEAR);
   remap(back, backUnd, map_x, map_y, INTER_LINEAR);
 
-  imshow("undistortedLeft", leftUnd);
   leftUnd = leftUnd(warpPerspCrop);
   rightUnd = rightUnd(warpPerspCrop);
   frontUnd = frontUnd(warpPerspCrop);
   backUnd = backUnd(warpPerspCrop);
 
-  warpPerspective(leftUnd,leftWarped,M,left.size()); 
-  warpPerspective(rightUnd,rightWarped,M,left.size()); 
-  warpPerspective(frontUnd,frontWarped,M,left.size()); 
-  warpPerspective(backUnd,backWarped,M,left.size()); 
+  warpPerspective(leftUnd,left,M,left.size()); 
+  warpPerspective(rightUnd,right,M,left.size());
+  rotate (right, right, ROTATE_90_CLOCKWISE);
+  warpPerspective(frontUnd,front,M,left.size());
+  rotate (left,left,ROTATE_90_COUNTERCLOCKWISE);
+  warpPerspective(backUnd,back,M,front.size()); 
+  rotate(back, back, ROTATE_180);
   
-  imshow("leftWarped", leftWarped);
-  imshow("rightWarped", rightWarped);
-  imshow("frontWarped", frontWarped);
-  imshow("backWarped", backWarped);
+
+  setAlpha(&left);
+  setAlpha(&right);
+  setAlpha(&front);
+  setAlpha(&back);
+  mergeImages(&stitched, front, right, back, left, car);
+  // imshow("left", left);
+  // imshow("right", right);
+  // imshow("front", front);
+  // imshow("back", back);
 
   waitKey(0);
   return 0;
 }
+
+
