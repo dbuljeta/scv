@@ -19,7 +19,7 @@ void setAlpha(Mat* img)
     for (int x = 0; x < (*img).cols; ++x)
     {
         cv::Vec4b & pixel = (*img).at<cv::Vec4b>(y, x);
-        // if pixel is white
+        // if pixel is black
         if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0)
         {
             // set alpha to zero:
@@ -30,12 +30,50 @@ void setAlpha(Mat* img)
 
 void mergeImages (Mat* stitched, Mat front, Mat right, Mat back, Mat left, Mat car)
 {
-  //  imshow("left", left);
-  // imshow("right", right);
-  // imshow("front", front);
-  // imshow("back", back);
+  int i,j;
+
+  //frontImage iterating and pasting pixels onto stitched image
+  for (i = 0; i < 490; ++i)
+  {
+    for (j = i; j < 1280 - i; ++j)
+    {
+      (*stitched).at<cv::Vec4b>(i,j) = (front).at<cv::Vec4b>(i,j);
+    }
+  }
+
+  // //leftImage iterating and pasting pixels onto stitched image
+  for (i = 0; i < 490; ++i)
+  {
+    for (j = i; j < 1280-i; ++j)
+    {
+      (*stitched).at<cv::Vec4b>(j,i) = (left).at<cv::Vec4b>(j,i);
+    }
+  }
+  
+  //backImageIterataion
+  for (i = 790; i < 1280; ++i)
+  {
+    for (j = 1280 - i; j < i; ++j)
+    {
+      (*stitched).at<cv::Vec4b>(i,j) = (back).at<cv::Vec4b>(i - 560 ,j);
+    }
+  }
+  
+  //rightImageIteration
+   for (i = 790; i < 1280; ++i)
+  {
+    for (j = 1279-i; j < i; ++j)
+    {
+      (*stitched).at<cv::Vec4b>(j,i) = (right).at<cv::Vec4b>(j,i-560);
+    }
+  }
+
   // imshow("stitched", *stitched);
-  // imwrite("stitched.png",*stitched);
+  imwrite("stitched.png",*stitched);
+  imwrite("left.png",left);
+  imwrite("right.png",right);
+  imwrite("front.png",front);
+  imwrite("back.png",back);
   
 }
 
@@ -52,7 +90,7 @@ int main ()
   Mat back = imread("back.bmp", IMREAD_COLOR);
   Mat backUnd;
   Mat car = imread ("blueCarResized.png", IMREAD_COLOR);
-  Mat stitched(2000, 2500, CV_8UC3, Scalar(0, 0, 0));  
+  Mat stitched(1280, 1280, CV_8UC3, Scalar(0, 0, 0));  
   setAlpha(&stitched);
   //init undistort rectify params
   Matx33d P (335.4360116970886, 0.0, 638.3853408401494 ,
