@@ -68,6 +68,42 @@ void mergeImages (Mat* stitched, Mat front, Mat right, Mat back, Mat left, Mat c
     }
   }
 
+  //Try to align pictures from each view
+// //leftImage iterating and pasting pixels onto stitched image
+    // for (i = 0; i < 490; ++i)
+    // {
+    //   for (j = i; j < 1280-i; ++j)
+    //   {
+    //     (*stitched).at<cv::Vec4b>(j,i+350) = (left).at<cv::Vec4b>(j,i);
+    //   }
+    // }
+    // //rightImageIteration
+    // for (i = 790; i < 1280; ++i)
+    //   {
+    //   for (j = 1279-i; j < i; ++j)
+    //   {
+    //     (*stitched).at<cv::Vec4b>(j,i-350) = (right).at<cv::Vec4b>(j,i-560);
+    //   }
+    // }
+    // //backImageIterataion
+    // for (i = 790; i < 1280; ++i)
+    // {
+    //   for (j = 1280 - i; j < i; ++j)
+    //   {
+    //     (*stitched).at<cv::Vec4b>(i-50,j) = (back).at<cv::Vec4b>(i - 560 ,j);
+    //   }
+    // }
+    // //frontImage iterating and pasting pixels onto stitched image
+    // for (i = 0; i < 490; ++i)
+    // {
+    //   for (j = i; j < 1280 - i; ++j)
+    //   {
+    //     (*stitched).at<cv::Vec4b>(i+100,j) = (front).at<cv::Vec4b>(i,j);
+    //   }
+    // }
+//
+
+
   // imshow("stitched", *stitched);
   imwrite("stitched.png",*stitched);
   imwrite("left.png",left);
@@ -82,6 +118,7 @@ int main ()
 {
   Rect warpPerspCrop(0, 400, IMAGE_W, IMAGE_H - 400);
   Mat left = imread("paintLinedPictures/leftPaint.bmp", IMREAD_COLOR);
+
   Mat leftUnd;
   Mat right = imread("paintLinedPictures/rightPaint.bmp", IMREAD_COLOR);
   Mat rightUnd;
@@ -157,5 +194,3 @@ int main ()
   waitKey(0);
   return 0;
 }
-
-
