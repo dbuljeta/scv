@@ -81,13 +81,13 @@ void mergeImages (Mat* stitched, Mat front, Mat right, Mat back, Mat left, Mat c
 int main ()
 {
   Rect warpPerspCrop(0, 400, IMAGE_W, IMAGE_H - 400);
-  Mat left = imread("left.bmp", IMREAD_COLOR);
+  Mat left = imread("paintLinedPictures/leftPaint.bmp", IMREAD_COLOR);
   Mat leftUnd;
-  Mat right = imread("right.bmp", IMREAD_COLOR);
+  Mat right = imread("paintLinedPictures/rightPaint.bmp", IMREAD_COLOR);
   Mat rightUnd;
-  Mat front = imread("front.bmp", IMREAD_COLOR);
+  Mat front = imread("paintLinedPictures/frontPaint.bmp", IMREAD_COLOR);
   Mat frontUnd;
-  Mat back = imread("back.bmp", IMREAD_COLOR);
+  Mat back = imread("paintLinedPictures/backPaint.bmp", IMREAD_COLOR);
   Mat backUnd;
   Mat car = imread ("blueCarResized.png", IMREAD_COLOR);
   Mat stitched(1280, 1280, CV_8UC3, Scalar(0, 0, 0));  
