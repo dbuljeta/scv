@@ -12,10 +12,11 @@ using namespace cv;
 // g++ -std=c++11 test.cpp `pkg-config --libs --cflags opencv` -o test
 
 
-void setAlpha(Mat* img)
+static void setAlpha(Mat* img)
 {
   cvtColor(*img, *img, COLOR_BGR2BGRA);
   for (int y = 0; y < (*img).rows; ++y)
+  {
     for (int x = 0; x < (*img).cols; ++x)
     {
         cv::Vec4b & pixel = (*img).at<cv::Vec4b>(y, x);
@@ -26,43 +27,22 @@ void setAlpha(Mat* img)
             pixel[3] = 0;
         }
     }
+  }
+    
 }
 void fourPointTransform(Mat* img)
 {
-
-
   vector<Point> not_a_rect_shape;
-    not_a_rect_shape.push_back(Point(420, 375));
+    not_a_rect_shape.push_back(Point(420, 380));
     not_a_rect_shape.push_back(Point(870, 370));
     not_a_rect_shape.push_back(Point(1260, 500));
     not_a_rect_shape.push_back(Point(20, 515));
   const Point* point = &not_a_rect_shape[0];
   int i,j ;
-  // imshow("img", *img);
-  // waitKey(0);
   Mat warped;
   Point2f src[4];
   Point2f dst[4];
   int maxHeight,maxWidth;
-  //height
-  // float maxHeight;
-  // float heightA = ((864 - 1111)^2)+((0-260)^2); 
-  // float heightB = ((464 - 264)^2)+((0-293)^2);
-  // if (heightA>heightB)
-  // {
-  //   maxHeight = heightA;
-  // } 
-  // else maxHeight = heightB;
-  // //width 
-  // float maxWidth;
-  // float widthA = ((1111 - 216)^2)+((260-263)^2); 
-  // float widthB = ((864-464)^2)+((0-0)^2); 
-
-  // if (widthA>widthB)
-  // {
-  //   maxWidth = widthA;
-  // } 
-  // else maxWidth = widthB;
 
   //Points
   src[0] = Point2f(420, 380);
@@ -100,46 +80,112 @@ void fourPointTransform(Mat* img)
   // waitKey(0);
 
 }
+void mergeImagesFourPoints(Mat* stitched, Mat front, Mat right, Mat back, Mat left, Mat car)
+{
+  int i,j;
+
+  //frontImage iterating and pasting pixels onto stitched image
+  for (j = 0; j<1000;j++)
+  for(i = 0; i<250;i++)
+  {
+    (*stitched).at<cv::Vec3b>(i,j) = (front).at<cv::Vec3b>(i,j);
+  }
+
+  for (j = 0; j<1000;j++)
+  for(i = 0; i<250;i++)
+  {
+    (*stitched).at<cv::Vec3b>(j+250,i) = (left).at<cv::Vec3b>(j,i);
+  }
+  for (j = 0; j<1000;j++)
+  for(i = 0; i<250;i++)
+  {
+    (*stitched).at<cv::Vec3b>(i+1000,j) = (back).at<cv::Vec3b>(i,j);
+  }
+  // for (i = 0; i < 490; ++i)
+  // {
+  //   for (j = i; j < 1280 - i; ++j)
+  //   {
+  //     (*stitched).at<cv::Vec4b>(i,j) = (front).at<cv::Vec4b>(i,j);
+  //   }
+  // }
+
+  // // //leftImage iterating and pasting pixels onto stitched image
+  // for (i = 0; i < 490; ++i)
+  // {
+  //   for (j = i; j < 1280-i; ++j)
+  //   {
+  //     (*stitched).at<cv::Vec4b>(j,i) = (left).at<cv::Vec4b>(j,i);
+  //   }
+  // }
+  
+  // //backImageIterataion
+  // for (i = 790; i < 1280; ++i)
+  // {
+  //   for (j = 1280 - i; j < i; ++j)
+  //   {
+  //     (*stitched).at<cv::Vec4b>(i,j) = (back).at<cv::Vec4b>(i - 560 ,j);
+  //   }
+  // }
+  
+  // //rightImageIteration
+  //  for (i = 790; i < 1280; ++i)
+  // {
+  //   for (j = 1279-i; j < i; ++j)
+  //   {
+  //     (*stitched).at<cv::Vec4b>(j,i) = (right).at<cv::Vec4b>(j,i-560);
+  //   }
+  // }
+   imshow("stitched", *stitched);
+  imwrite("stitched1.png",*stitched);
+}
+
 
 void mergeImages (Mat* stitched, Mat front, Mat right, Mat back, Mat left, Mat car)
 {
   int i,j;
 
   //frontImage iterating and pasting pixels onto stitched image
-  for (i = 0; i < 490; ++i)
-  {
-    for (j = i; j < 1280 - i; ++j)
-    {
-      (*stitched).at<cv::Vec4b>(i,j) = (front).at<cv::Vec4b>(i,j);
-    }
-  }
+  // for (i = 0; i<1000;i++)
+  // for(j = 0; j<250;j++)
+  // {
+  //   cout <<"i,j = "<< i,j;
+  //   cout << endl;
+  //   (*stitched).at<cv::Vec4b>(i,j) = (front).at<cv::Vec4b>(i,j);
+  // }
+  // for (i = 0; i < 490; ++i)
+  // {
+  //   for (j = i; j < 1280 - i; ++j)
+  //   {
+  //     (*stitched).at<cv::Vec4b>(i,j) = (front).at<cv::Vec4b>(i,j);
+  //   }
+  // }
 
-  // //leftImage iterating and pasting pixels onto stitched image
-  for (i = 0; i < 490; ++i)
-  {
-    for (j = i; j < 1280-i; ++j)
-    {
-      (*stitched).at<cv::Vec4b>(j,i) = (left).at<cv::Vec4b>(j,i);
-    }
-  }
+  // // //leftImage iterating and pasting pixels onto stitched image
+  // for (i = 0; i < 490; ++i)
+  // {
+  //   for (j = i; j < 1280-i; ++j)
+  //   {
+  //     (*stitched).at<cv::Vec4b>(j,i) = (left).at<cv::Vec4b>(j,i);
+  //   }
+  // }
   
-  //backImageIterataion
-  for (i = 790; i < 1280; ++i)
-  {
-    for (j = 1280 - i; j < i; ++j)
-    {
-      (*stitched).at<cv::Vec4b>(i,j) = (back).at<cv::Vec4b>(i - 560 ,j);
-    }
-  }
+  // //backImageIterataion
+  // for (i = 790; i < 1280; ++i)
+  // {
+  //   for (j = 1280 - i; j < i; ++j)
+  //   {
+  //     (*stitched).at<cv::Vec4b>(i,j) = (back).at<cv::Vec4b>(i - 560 ,j);
+  //   }
+  // }
   
-  //rightImageIteration
-   for (i = 790; i < 1280; ++i)
-  {
-    for (j = 1279-i; j < i; ++j)
-    {
-      (*stitched).at<cv::Vec4b>(j,i) = (right).at<cv::Vec4b>(j,i-560);
-    }
-  }
+  // //rightImageIteration
+  //  for (i = 790; i < 1280; ++i)
+  // {
+  //   for (j = 1279-i; j < i; ++j)
+  //   {
+  //     (*stitched).at<cv::Vec4b>(j,i) = (right).at<cv::Vec4b>(j,i-560);
+  //   }
+  // }
 
   // imshow("stitched", *stitched);
   // imwrite("stitched.png",*stitched);
@@ -154,7 +200,6 @@ void mergeImages (Mat* stitched, Mat front, Mat right, Mat back, Mat left, Mat c
 int main ()
 {
  
-  Rect warpPerspCrop(0, 400, IMAGE_W, IMAGE_H - 400);
   Mat left = imread("paintLinedPictures/leftPaint.bmp", IMREAD_COLOR);
   Mat leftUnd;
   Mat right = imread("paintLinedPictures/rightPaint.bmp", IMREAD_COLOR);
@@ -164,8 +209,8 @@ int main ()
   Mat back = imread("paintLinedPictures/backPaint.bmp", IMREAD_COLOR);
   Mat backUnd;
   Mat car = imread ("blueCarResized.png", IMREAD_COLOR);
-  Mat stitched(1280, 1280, CV_8UC3, Scalar(0, 0, 0));  
-  setAlpha(&stitched);
+  Mat stitched(1500, 1500, CV_8UC3, Scalar(0, 0, 0));  
+  // setAlpha(&stitched);
   //init undistort rectify params
   Matx33d P (335.4360116970886, 0.0, 638.3853408401494 ,
                0.0, 335.6314521829435, 403.2844174394132,
@@ -205,44 +250,26 @@ int main ()
   remap(front, frontUnd, map_x, map_y, INTER_LINEAR);
   remap(back, backUnd, map_x, map_y, INTER_LINEAR);
 
-  // leftUnd = leftUnd(warpPerspCrop);
-  // rightUnd = rightUnd(warpPerspCrop);
-  // frontUnd = frontUnd(warpPerspCrop);
-  // backUnd = backUnd(warpPerspCrop);
-  imshow("undistorted", leftUnd);
-  // warpPerspective(leftUnd,left,M,left.size()); 
-  // imshow("leftwarped", left);
-  // waitKey(0);
   fourPointTransform(&leftUnd);  
-  imwrite("leftUnd.png",leftUnd);
-
   fourPointTransform(&rightUnd); 
-  imwrite("rightUnd.png",rightUnd);
   fourPointTransform(&frontUnd); 
-   imwrite("frontUnd.png",frontUnd);
   fourPointTransform(&backUnd); 
-   imwrite("backUnd.png",backUnd);
-  // warpPerspective(rightUnd,right,M,left.size());
-  // fourPointTransform(&right); 
-  // warpPerspective(frontUnd,front,M,left.size());
-  // fourPointTransform(&front); 
-  // warpPerspective(backUnd,back,M,front.size()); 
-  // fourPointTransform(&back); 
-  // rotate (left,left,ROTATE_90_COUNTERCLOCKWISE);
-  // rotate (right, right, ROTATE_90_CLOCKWISE);
-  // rotate(back, back, ROTATE_180);
-  
 
-  setAlpha(&left);
-  setAlpha(&right);
-  setAlpha(&front);
-  setAlpha(&back);
-  // imshow("left", left);
-  // imshow("right", right);
-  // imshow("front", front);
-  // imshow("back", back);
-  // waitKey(0);
-  mergeImages(&stitched, front, right, back, left, car);
+  rotate (leftUnd,leftUnd,ROTATE_90_COUNTERCLOCKWISE);
+  rotate (rightUnd, rightUnd, ROTATE_90_CLOCKWISE);
+  rotate(backUnd, backUnd, ROTATE_180);
+  imwrite("leftUnd.png",leftUnd);
+  imwrite("rightUnd.png",rightUnd);
+  imwrite("frontUnd.png",frontUnd);
+  imwrite("backUnd.png",backUnd);
+  
+  // setAlpha(&left);
+  // setAlpha(&right);
+  // setAlpha(&front);
+  // setAlpha(&back);
+
+  // mergeImages(&stitched, front, right, back, left, car);
+  mergeImagesFourPoints(&stitched, frontUnd, rightUnd, backUnd, leftUnd, car);
 
   return 0;
 }
