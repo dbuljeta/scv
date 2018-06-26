@@ -27,6 +27,79 @@ void setAlpha(Mat* img)
         }
     }
 }
+void fourPointTransform(Mat* img)
+{
+
+
+  vector<Point> not_a_rect_shape;
+    not_a_rect_shape.push_back(Point(420, 375));
+    not_a_rect_shape.push_back(Point(870, 370));
+    not_a_rect_shape.push_back(Point(1260, 500));
+    not_a_rect_shape.push_back(Point(20, 515));
+  const Point* point = &not_a_rect_shape[0];
+  int i,j ;
+  // imshow("img", *img);
+  // waitKey(0);
+  Mat warped;
+  Point2f src[4];
+  Point2f dst[4];
+  int maxHeight,maxWidth;
+  //height
+  // float maxHeight;
+  // float heightA = ((864 - 1111)^2)+((0-260)^2); 
+  // float heightB = ((464 - 264)^2)+((0-293)^2);
+  // if (heightA>heightB)
+  // {
+  //   maxHeight = heightA;
+  // } 
+  // else maxHeight = heightB;
+  // //width 
+  // float maxWidth;
+  // float widthA = ((1111 - 216)^2)+((260-263)^2); 
+  // float widthB = ((864-464)^2)+((0-0)^2); 
+
+  // if (widthA>widthB)
+  // {
+  //   maxWidth = widthA;
+  // } 
+  // else maxWidth = widthB;
+
+  //Points
+  src[0] = Point2f(420, 380);
+  src[1] = Point2f(870, 370);
+  src[2] = Point2f(1260, 500);
+  src[3] = Point2f(20, 515);
+
+  maxWidth = 1080;
+  maxHeight = 260;
+  
+  dst[0] = Point2f(0,0);
+  dst[1] = Point2f(maxWidth - 1,0);
+  dst[2] = Point2f(maxWidth - 1, maxHeight -1);
+  dst[3] = Point2f(0, maxHeight -1);  
+  Mat M (2, 4, CV_32FC1);
+  M = getPerspectiveTransform(src, dst);
+  
+  for (i = 0; i< 4 ; i++)
+  {
+    cout<<endl;
+    for (j = 0; j< 2 ; j++)
+    {
+      cout <<M.at<float>(i,j)<<" ";
+      // cout <<"wads";
+    }
+  }
+  Mat draw = (*img).clone();
+  warpPerspective(draw, (*img), M, Size (1000, 250),INTER_LINEAR,0);
+
+  // const Point2f* point = &src[0];
+  int n = 4;
+  // polylines(draw, &point, &n, 1, true, Scalar(0, 255, 0), 3, 8);
+  // imwrite("draw.jpg", draw);
+  // imshow("fourPointsWarped",*img);
+  // waitKey(0);
+
+}
 
 void mergeImages (Mat* stitched, Mat front, Mat right, Mat back, Mat left, Mat car)
 {
@@ -68,57 +141,21 @@ void mergeImages (Mat* stitched, Mat front, Mat right, Mat back, Mat left, Mat c
     }
   }
 
-  //Try to align pictures from each view
-// //leftImage iterating and pasting pixels onto stitched image
-    // for (i = 0; i < 490; ++i)
-    // {
-    //   for (j = i; j < 1280-i; ++j)
-    //   {
-    //     (*stitched).at<cv::Vec4b>(j,i+350) = (left).at<cv::Vec4b>(j,i);
-    //   }
-    // }
-    // //rightImageIteration
-    // for (i = 790; i < 1280; ++i)
-    //   {
-    //   for (j = 1279-i; j < i; ++j)
-    //   {
-    //     (*stitched).at<cv::Vec4b>(j,i-350) = (right).at<cv::Vec4b>(j,i-560);
-    //   }
-    // }
-    // //backImageIterataion
-    // for (i = 790; i < 1280; ++i)
-    // {
-    //   for (j = 1280 - i; j < i; ++j)
-    //   {
-    //     (*stitched).at<cv::Vec4b>(i-50,j) = (back).at<cv::Vec4b>(i - 560 ,j);
-    //   }
-    // }
-    // //frontImage iterating and pasting pixels onto stitched image
-    // for (i = 0; i < 490; ++i)
-    // {
-    //   for (j = i; j < 1280 - i; ++j)
-    //   {
-    //     (*stitched).at<cv::Vec4b>(i+100,j) = (front).at<cv::Vec4b>(i,j);
-    //   }
-    // }
-//
-
-
   // imshow("stitched", *stitched);
-  imwrite("stitched.png",*stitched);
-  imwrite("left.png",left);
-  imwrite("right.png",right);
-  imwrite("front.png",front);
-  imwrite("back.png",back);
+  // imwrite("stitched.png",*stitched);
+  // imwrite("left.png",left);
+  // imwrite("right.png",right);
+  // imwrite("front.png",front);
+  // imwrite("back.png",back);
   
 }
 
 
 int main ()
 {
+ 
   Rect warpPerspCrop(0, 400, IMAGE_W, IMAGE_H - 400);
   Mat left = imread("paintLinedPictures/leftPaint.bmp", IMREAD_COLOR);
-
   Mat leftUnd;
   Mat right = imread("paintLinedPictures/rightPaint.bmp", IMREAD_COLOR);
   Mat rightUnd;
@@ -157,6 +194,7 @@ int main ()
 
   Mat M (2, 4, CV_32FC1);
   M = getPerspectiveTransform(src, dst);
+
   //working warp perspective
   // 
   map_x.create( left.size(), CV_32FC1 );
@@ -167,30 +205,44 @@ int main ()
   remap(front, frontUnd, map_x, map_y, INTER_LINEAR);
   remap(back, backUnd, map_x, map_y, INTER_LINEAR);
 
-  leftUnd = leftUnd(warpPerspCrop);
-  rightUnd = rightUnd(warpPerspCrop);
-  frontUnd = frontUnd(warpPerspCrop);
-  backUnd = backUnd(warpPerspCrop);
+  // leftUnd = leftUnd(warpPerspCrop);
+  // rightUnd = rightUnd(warpPerspCrop);
+  // frontUnd = frontUnd(warpPerspCrop);
+  // backUnd = backUnd(warpPerspCrop);
+  imshow("undistorted", leftUnd);
+  // warpPerspective(leftUnd,left,M,left.size()); 
+  // imshow("leftwarped", left);
+  // waitKey(0);
+  fourPointTransform(&leftUnd);  
+  imwrite("leftUnd.png",leftUnd);
 
-  warpPerspective(leftUnd,left,M,left.size()); 
-  warpPerspective(rightUnd,right,M,left.size());
-  rotate (right, right, ROTATE_90_CLOCKWISE);
-  warpPerspective(frontUnd,front,M,left.size());
-  rotate (left,left,ROTATE_90_COUNTERCLOCKWISE);
-  warpPerspective(backUnd,back,M,front.size()); 
-  rotate(back, back, ROTATE_180);
+  fourPointTransform(&rightUnd); 
+  imwrite("rightUnd.png",rightUnd);
+  fourPointTransform(&frontUnd); 
+   imwrite("frontUnd.png",frontUnd);
+  fourPointTransform(&backUnd); 
+   imwrite("backUnd.png",backUnd);
+  // warpPerspective(rightUnd,right,M,left.size());
+  // fourPointTransform(&right); 
+  // warpPerspective(frontUnd,front,M,left.size());
+  // fourPointTransform(&front); 
+  // warpPerspective(backUnd,back,M,front.size()); 
+  // fourPointTransform(&back); 
+  // rotate (left,left,ROTATE_90_COUNTERCLOCKWISE);
+  // rotate (right, right, ROTATE_90_CLOCKWISE);
+  // rotate(back, back, ROTATE_180);
   
 
   setAlpha(&left);
   setAlpha(&right);
   setAlpha(&front);
   setAlpha(&back);
-  mergeImages(&stitched, front, right, back, left, car);
   // imshow("left", left);
   // imshow("right", right);
   // imshow("front", front);
   // imshow("back", back);
+  // waitKey(0);
+  mergeImages(&stitched, front, right, back, left, car);
 
-  waitKey(0);
   return 0;
 }
