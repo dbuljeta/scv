@@ -84,23 +84,32 @@ void mergeImagesFourPoints(Mat* stitched, Mat front, Mat right, Mat back, Mat le
 {
   int i,j;
 
+
+  for (j = 0; j<1000;j++)
+  for(i = 0; i<250;i++)
+  {
+    (*stitched).at<cv::Vec3b>(j,i+645) = (right).at<cv::Vec3b>(j,i);
+  }
+ 
   //frontImage iterating and pasting pixels onto stitched image
   for (j = 0; j<1000;j++)
   for(i = 0; i<250;i++)
   {
     (*stitched).at<cv::Vec3b>(i,j) = (front).at<cv::Vec3b>(i,j);
   }
-
+ 
   for (j = 0; j<1000;j++)
   for(i = 0; i<250;i++)
   {
-    (*stitched).at<cv::Vec3b>(j+250,i) = (left).at<cv::Vec3b>(j,i);
+    (*stitched).at<cv::Vec3b>(i+930,j+120) = (back).at<cv::Vec3b>(i,j);
   }
   for (j = 0; j<1000;j++)
   for(i = 0; i<250;i++)
   {
-    (*stitched).at<cv::Vec3b>(i+1000,j) = (back).at<cv::Vec3b>(i,j);
+    (*stitched).at<cv::Vec3b>(j+155,i+230) = (left).at<cv::Vec3b>(j,i);
   }
+  imshow("stitched", *stitched);
+  waitKey(0);
   // for (i = 0; i < 490; ++i)
   // {
   //   for (j = i; j < 1280 - i; ++j)
@@ -135,7 +144,7 @@ void mergeImagesFourPoints(Mat* stitched, Mat front, Mat right, Mat back, Mat le
   //     (*stitched).at<cv::Vec4b>(j,i) = (right).at<cv::Vec4b>(j,i-560);
   //   }
   // }
-   imshow("stitched", *stitched);
+  
   imwrite("stitched1.png",*stitched);
 }
 
