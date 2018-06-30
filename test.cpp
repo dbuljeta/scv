@@ -122,6 +122,14 @@ void mergeImagesFourPoints(Mat* stitched, Mat front, Mat right, Mat back, Mat le
       (*stitched).at<cv::Vec3b>(i+930,j-110) = (back).at<cv::Vec3b>(i,j);  
       //-110 saving on stitched image starts at zero pixel 
   }
+  
+  //car Image placing
+  for (j = 0; j<680;j++)
+  for(i = 0; i<200;i++)
+  {
+      (*stitched).at<cv::Vec3b>(j+250,i+225) = (car).at<cv::Vec3b>(j,i);  
+      //-110 saving on stitched image starts at zero pixel 
+  }
 
 
   imwrite("stitched1.png",*stitched);
@@ -199,9 +207,12 @@ int main ()
   Mat frontUnd;
   Mat back = imread("paintLinedPictures/backPaint.bmp", IMREAD_COLOR);
   Mat backUnd;
-  Mat car = imread ("blueCarResized.png", IMREAD_COLOR);
+  Mat car = imread ("car1.png", IMREAD_COLOR);
+  // imshow("car",car);
+  // waitKey(0);
   Mat stitched(1200, 660, CV_8UC3, Scalar(0, 0, 0));  
   // setAlpha(&stitched);
+  // setAlpha(&car);
   //init undistort rectify params
   Matx33d P (335.4360116970886, 0.0, 638.3853408401494 ,
                0.0, 335.6314521829435, 403.2844174394132,
