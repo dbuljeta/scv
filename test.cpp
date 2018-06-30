@@ -57,7 +57,7 @@ void fourPointTransform(Mat* img)
   
   for (i = 0; i< 4 ; i++)
   {
-    cout<<endl;
+    // cout<<endl;
     for (j = 0; j< 2 ; j++)
     {
       // cout <<M.at<float>(i,j)<<" ";
@@ -65,6 +65,8 @@ void fourPointTransform(Mat* img)
     }
   }
   Mat draw = (*img).clone();
+
+  // resolution in warpPerspective transformation defines the ratio betwen elements, this resolution depends of number of charts.
   warpPerspective(draw, (*img), M, Size (1000, 250),INTER_LINEAR,0);
 
   //Draw region for warpPerspective
@@ -85,43 +87,42 @@ void mergeImagesFourPoints(Mat* stitched, Mat front, Mat right, Mat back, Mat le
 {
   int i,j;
 
-  //right
-  //y0 x645
+  //Resolution of every warped image is 1000x250/ 250x1000 depending of is it a side(250x1000) or front/back image(1000x250)
+
+  //right image stitching on stitched image->all pixels
   for (j = 0; j<1000;j++)
   for(i = 0; i<250;i++)
   {
-    (*stitched).at<cv::Vec3b>(j,i+645) = (right).at<cv::Vec3b>(j,i);
-  }
-  //left
-  //x = 155, y = 240
-  for (j = 0; j<1000;j++)
-  for(i = 0; i<250;i++)
-  {
-    (*stitched).at<cv::Vec3b>(j+155,i+240) = (left).at<cv::Vec3b>(j,i);
+    (*stitched).at<cv::Vec3b>(j,i+405) = (right).at<cv::Vec3b>(j,i);
+    //x offset on big (stitched) image for pasting right image pixels 
   }
 
-  //frontImage iterating and pasting pixels onto stitched image
-  //240-900 xiterating 
-  for (j = 0; j<900;j++)
-  for(i = 0; i<250;i++)
-  { 
-    if (j>240 )
-    {
-      (*stitched).at<cv::Vec3b>(i,j) = (front).at<cv::Vec3b>(i,j);
-    }
-  }
-  //back
-  //110-770 xiterating
-  //back offset y=930, x=130
-  for (j = 0; j<770;j++)
+  // left image stitching on stitched image->all pixels
+  // yoffset = 155 
+  for (j = 0; j<1000;j++)
   for(i = 0; i<250;i++)
   {
-    if(j>110)
-    {
-      (*stitched).at<cv::Vec3b>(i+930,j+130) = (back).at<cv::Vec3b>(i,j);
-    }
-    
+    (*stitched).at<cv::Vec3b>(j+155,i) = (left).at<cv::Vec3b>(j,i);
   }
+
+  //front image stitching on stitched image->all pixels
+  //valid x (width) pixels with whole height (240-900)
+  for (j = 240; j<900;j++)
+  for(i = 0; i<250;i++)
+  { 
+    (*stitched).at<cv::Vec3b>(i,j-240) = (front).at<cv::Vec3b>(i,j);
+    //-240 saving on stitched image starts at zero pixel 
+  }
+
+  //back image stitching on stitched image->all pixels
+  //valid x (width) pixels with whole height (110-770)
+  for (j = 110; j<770;j++)
+  for(i = 0; i<250;i++)
+  {
+      (*stitched).at<cv::Vec3b>(i+930,j-110) = (back).at<cv::Vec3b>(i,j);  
+      //-110 saving on stitched image starts at zero pixel 
+  }
+
 
   imwrite("stitched1.png",*stitched);
   imshow("stitched", *stitched);
@@ -199,7 +200,7 @@ int main ()
   Mat back = imread("paintLinedPictures/backPaint.bmp", IMREAD_COLOR);
   Mat backUnd;
   Mat car = imread ("blueCarResized.png", IMREAD_COLOR);
-  Mat stitched(1200, 1200, CV_8UC3, Scalar(0, 0, 0));  
+  Mat stitched(1200, 660, CV_8UC3, Scalar(0, 0, 0));  
   // setAlpha(&stitched);
   //init undistort rectify params
   Matx33d P (335.4360116970886, 0.0, 638.3853408401494 ,
