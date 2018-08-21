@@ -12,6 +12,11 @@ using namespace cv;
 // g++ -std=c++11 test.cpp `pkg-config --libs --cflags opencv` -o test
 
 
+/**
+ * @brief function for image alpha channel adding
+ * 
+ * @param img - image to add alpha channel
+ */
 static void setAlpha(Mat* img)
 {
   cvtColor(*img, *img, COLOR_BGR2BGRA);
@@ -30,6 +35,12 @@ static void setAlpha(Mat* img)
   }
     
 }
+
+/**
+ * @brief function for getting image top-view (birds view)
+ * 
+ * @param img - image to transform
+ */
 void fourPointTransform(Mat* img)
 {
   
@@ -48,28 +59,25 @@ void fourPointTransform(Mat* img)
   maxWidth = 1080;
   maxHeight = 260;
   
+  // destination points
   dst[0] = Point2f(0,0);
   dst[1] = Point2f(maxWidth - 1,0);
   dst[2] = Point2f(maxWidth - 1, maxHeight -1);
   dst[3] = Point2f(0, maxHeight -1);  
+  
+  // creating perspective matrix
   Mat M (2, 4, CV_32FC1);
+
+  // getting perspective matrix
   M = getPerspectiveTransform(src, dst);
   
-  for (i = 0; i< 4 ; i++)
-  {
-    // cout<<endl;
-    for (j = 0; j< 2 ; j++)
-    {
-      // cout <<M.at<float>(i,j)<<" ";
-      // cout <<"wads";
-    }
-  }
+  // cloning image
   Mat draw = (*img).clone();
 
   // resolution in warpPerspective transformation defines the ratio betwen elements, this resolution depends of number of charts.
   warpPerspective(draw, (*img), M, Size (1000, 250),INTER_LINEAR,0);
 
-  //Draw region for warpPerspective
+  // //Draw region for warpPerspective and save image
   // vector<Point> not_a_rect_shape;
   //   not_a_rect_shape.push_back(Point(420, 380));
   //   not_a_rect_shape.push_back(Point(870, 370));
@@ -81,8 +89,18 @@ void fourPointTransform(Mat* img)
   // imwrite("draw.jpg", draw);
   // imshow("fourPointsWarped",*img);
   // waitKey(0);
-
 }
+
+/**
+ * @brief function for merging images (stitching)
+ * 
+ * @param stitched - whole stitched image
+ * @param front - image to stitch
+ * @param right - image to stitch
+ * @param back - image to stitch
+ * @param left - image to stitch
+ * @param car - image to stitch
+ */
 void mergeImagesFourPoints(Mat* stitched, Mat front, Mat right, Mat back, Mat left, Mat car)
 {
   int i,j;
@@ -93,6 +111,7 @@ void mergeImagesFourPoints(Mat* stitched, Mat front, Mat right, Mat back, Mat le
   for (j = 0; j<1000;j++)
   for(i = 0; i<250;i++)
   {
+    // getting a specified pixel from stitched and from right image
     (*stitched).at<cv::Vec3b>(j,i+405) = (right).at<cv::Vec3b>(j,i);
     //x offset on big (stitched) image for pasting right image pixels 
   }
@@ -131,74 +150,16 @@ void mergeImagesFourPoints(Mat* stitched, Mat front, Mat right, Mat back, Mat le
       //-110 saving on stitched image starts at zero pixel 
   }
 
-
+  // saving stitched image
   imwrite("stitched1.png",*stitched);
   imshow("stitched", *stitched);
   waitKey(0);
   
 }
 
-
-void mergeImages (Mat* stitched, Mat front, Mat right, Mat back, Mat left, Mat car)
-{
-  int i,j;
-
-  //frontImage iterating and pasting pixels onto stitched image
-  // for (i = 0; i<1000;i++)
-  // for(j = 0; j<250;j++)
-  // {
-  //   cout <<"i,j = "<< i,j;
-  //   cout << endl;
-  //   (*stitched).at<cv::Vec4b>(i,j) = (front).at<cv::Vec4b>(i,j);
-  // }
-  // for (i = 0; i < 490; ++i)
-  // {
-  //   for (j = i; j < 1280 - i; ++j)
-  //   {
-  //     (*stitched).at<cv::Vec4b>(i,j) = (front).at<cv::Vec4b>(i,j);
-  //   }
-  // }
-
-  // // //leftImage iterating and pasting pixels onto stitched image
-  // for (i = 0; i < 490; ++i)
-  // {
-  //   for (j = i; j < 1280-i; ++j)
-  //   {
-  //     (*stitched).at<cv::Vec4b>(j,i) = (left).at<cv::Vec4b>(j,i);
-  //   }
-  // }
-  
-  // //backImageIterataion
-  // for (i = 790; i < 1280; ++i)
-  // {
-  //   for (j = 1280 - i; j < i; ++j)
-  //   {
-  //     (*stitched).at<cv::Vec4b>(i,j) = (back).at<cv::Vec4b>(i - 560 ,j);
-  //   }
-  // }
-  
-  // //rightImageIteration
-  //  for (i = 790; i < 1280; ++i)
-  // {
-  //   for (j = 1279-i; j < i; ++j)
-  //   {
-  //     (*stitched).at<cv::Vec4b>(j,i) = (right).at<cv::Vec4b>(j,i-560);
-  //   }
-  // }
-
-  // imshow("stitched", *stitched);
-  // imwrite("stitched.png",*stitched);
-  // imwrite("left.png",left);
-  // imwrite("right.png",right);
-  // imwrite("front.png",front);
-  // imwrite("back.png",back);
-  
-}
-
-
 int main ()
 {
- 
+// path to images
   Mat left = imread("paintLinedPictures/leftPaint.bmp", IMREAD_COLOR);
   Mat leftUnd;
   Mat right = imread("paintLinedPictures/rightPaint.bmp", IMREAD_COLOR);
@@ -221,50 +182,45 @@ int main ()
   Mat map_x, map_y;
   //
   Matx33d KPComputed;
-  //Camera params
+  //Camera params used from python, same procedure for camera calibration in C++
   Matx33d K (335.4360116970886, 0.0, 638.3853408401494 , 0.0, 335.6314521829435, 403.2844174394132,  0, 0, 1);
-        
+ 
   Vec4d D (-0.010624391932770951,0.0692322261552681, -0.018577927478565195, 0.0006725877509963431);
 
   fisheye::estimateNewCameraMatrixForUndistortRectify(K, D, left.size(),Matx33d::eye(), KPComputed, 1);
-  //M get perspectiveTransform
-  Point2f src[4];
-  Point2f dst[4];
-  src[0] = Point2f( 9,IMAGE_H);
-  src[1] = Point2f( 1276,IMAGE_H);
-  src[2] = Point2f( 0, 0);
-  src[3] = Point2f( IMAGE_W, 0); 
-  dst[0] = Point2f( 373,IMAGE_H);
-  dst[1] = Point2f( 920,IMAGE_H);
-  dst[2] = Point2f( 0, 0);
-  dst[3] = Point2f( IMAGE_W, 0); 
 
-  Mat M (2, 4, CV_32FC1);
-  M = getPerspectiveTransform(src, dst);
-
-  //working warp perspective
-  // 
+  // creating mapx and mapy 
   map_x.create( left.size(), CV_32FC1 );
   map_y.create( left.size(), CV_32FC1 );
+  // initialization of mapx and mapy for undistortion
   fisheye::initUndistortRectifyMap(K, D, Matx33d::eye(), KPComputed, left.size(), CV_32FC1, map_x, map_y);
+  
+  // undistorting images
   remap(left, leftUnd, map_x, map_y, INTER_LINEAR);
   remap(right, rightUnd, map_x, map_y, INTER_LINEAR);
   remap(front, frontUnd, map_x, map_y, INTER_LINEAR);
   remap(back, backUnd, map_x, map_y, INTER_LINEAR);
+  //
 
+  //Perspective transforming
   fourPointTransform(&leftUnd);  
   fourPointTransform(&rightUnd); 
   fourPointTransform(&frontUnd); 
   fourPointTransform(&backUnd); 
+  //
 
+  //rotating images
   rotate (leftUnd,leftUnd,ROTATE_90_COUNTERCLOCKWISE);
   rotate (rightUnd, rightUnd, ROTATE_90_CLOCKWISE);
   rotate(backUnd, backUnd, ROTATE_180);
+  //
+  
   imwrite("leftUnd.png",leftUnd);
   imwrite("rightUnd.png",rightUnd);
   imwrite("frontUnd.png",frontUnd);
   imwrite("backUnd.png",backUnd);
   
+  //if you work with alpha channel you'll need to change the way of getting pixels (4dimensions)
   // setAlpha(&left);
   // setAlpha(&right);
   // setAlpha(&front);
